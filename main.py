@@ -5,11 +5,11 @@ from pydantic import BaseModel
 from openai import OpenAI
 
 # Henter API-nøkkel fra miljøvariabel
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    raise RuntimeError("OPENAI_API_KEY is not set")
+#OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+#if not OPENAI_API_KEY:
+    #raise RuntimeError("OPENAI_API_KEY is not set")
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+#client = OpenAI(api_key=OPENAI_API_KEY)
 
 app = FastAPI(title="AI-servitør API")
 

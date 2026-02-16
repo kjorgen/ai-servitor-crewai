@@ -1,0 +1,42 @@
+import os
+from crewai import Agent, Task, Crew
+from crewai.llm import LLM
+
+def run_frontdesk(message: str) -> str:
+    # LLM (enkelt oppsett)
+    llm = LLM(
+        model="gpt-4o-mini",
+        api_key=os.getenv("OPENAI_API_KEY"),
+        temperature=0.2
+    )
+
+    frontdesk = Agent(
+        role="Frontdesk-agent",
+        goal="Hjelpe restaurantgjester raskt og høflig på norsk.",
+        backstory=(
+            "Du er en robot-frontdesk for en norsk restaurant. "
+            "Du svarer kort, konkret og serviceorientert. "
+            "Hvis du mangler info, spør ett oppklarende spørsmål."
+        ),
+        llm=llm,
+        verbose=False
+    )
+
+    task = Task(
+        description=(
+            "Svar på meldingen fra kunden:\n"
+            f"---\n{message}\n---\n\n"
+            "Regler:\n"
+            "- Svar på norsk\n"
+            "- Maks 3 korte setninger\n"
+            "- Hvis det handler om booking: be om dato, tidspunkt, antall personer\n"
+            "- Hvis det handler om allergi: be om hvilken rett/allergi, og anbefal å dobbeltsjekke med restauranten\n"
+            "- Ikke finn på åpningstider/adresse hvis du ikke vet"
+        ),
+        expected_output="Kort svar til kunden.",
+        agent=frontdesk
+    )
+
+    crew = Crew(agents=[frontdesk], tasks=[task], verbose=False)
+    result = crew.kickoff()
+    return str(result).strip()

@@ -1,3 +1,4 @@
+from crew_frontdesk import run_frontdesk
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -99,23 +100,6 @@ def fallback_agent(_: str) -> str:
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest):
-    message = req.message
-
-    intents = detect_intents(message)
-    parts = {}
-
-    for intent in intents:
-        if intent == "ALLERGY":
-            parts[intent] = allergy_agent(message)
-        elif intent == "BOOKING":
-            parts[intent] = booking_agent(message)
-        elif intent == "INFO":
-            parts[intent] = info_agent(message)
-        elif intent == "MENU":
-            parts[intent] = menu_agent(message)
-        else:
-            parts[intent] = fallback_agent(message)
-
-    reply = "\n\n".join(parts.values())
+    reply = run_frontdesk(req.message)
     return ChatResponse(reply=reply)
 

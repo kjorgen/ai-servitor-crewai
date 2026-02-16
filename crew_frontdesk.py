@@ -6,7 +6,7 @@ def run_frontdesk(message: str) -> str:
     # LLM (enkelt oppsett)
     llm = LLM(
         model="gpt-4o-mini",
-        api_key=os.getenv("OPENAI_API_KEY"),
+        api_key=os.getenv("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"),
         temperature=0.2
     )
 

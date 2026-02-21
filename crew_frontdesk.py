@@ -2,6 +2,16 @@ import os
 from crewai import Agent, Task, Crew
 from crewai.llm import LLM
 
+from pathlib import Path
+
+KB_PATH = Path(__file__).with_name("knowledge_base.txt")
+
+def load_kb() -> str:
+    try:
+        return KB_PATH.read_text(encoding="utf-8")
+    except Exception:
+        return ""
+
 def run_frontdesk(message: str) -> str:
     # LLM (enkelt oppsett)
     llm = LLM(

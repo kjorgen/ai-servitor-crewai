@@ -15,21 +15,38 @@ def load_kb() -> str:
 def run_frontdesk(message: str) -> str:
     # LLM (enkelt oppsett)
     llm = LLM(
-        model="gpt-4o-mini",
-        api_key=os.getenv("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"),
-        temperature=0.2
+        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+        api_key=api_key,
+        temperature=0.2,
     )
 
-    frontdesk = Agent(
-        role="Frontdesk-agent",
-        goal="Hjelpe restaurantgjester raskt og høflig på norsk.",
-        backstory=(
-            "Du er en robot-frontdesk for en norsk restaurant. "
-            "Du svarer kort, konkret og serviceorientert. "
-            "Hvis du mangler info, spør ett oppklarende spørsmål."
-        ),
-        llm=llm,
-        verbose=False
+   kb = load_kb()
+
+frontdesk_agent = Agent(
+    role="Digital resepsjonist",
+    goal="Svar korrekt på spørsmål om restauranten.",
+    backstory=f"""
+Du er en digital resepsjonist for restauranten Made in India.
+
+DU MÅ følge disse reglene:
+
+1. Svar kun basert på informasjonen i kunnskapsbasen.
+2. Hvis informasjon ikke finnes i kunnskapsbasen:
+   - Si at du ikke har informasjonen.
+   - Ikke gjett.
+3. Ikke finn på åpningstider, priser, allergener eller kontaktinfo.
+4. Ved reservasjon skal du alltid be om:
+   - dato
+   - tidspunkt
+   - antall personer
+   - navn
+   - telefonnummer
+
+KUNNSKAPSBASEN:
+{kb}
+""",
+    verbose=True
+)
     )
 
     task = Task(

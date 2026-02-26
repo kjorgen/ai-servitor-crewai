@@ -14,7 +14,7 @@ def load_kb() -> str:
         return ""
 
 
-def run_frontdesk(message: str) -> str:
+def run_frontdesk(message: str, context: str = "") -> str:
     kb = load_kb()
 
     llm = LLM(
@@ -44,6 +44,12 @@ KUNNSKAPSBASEN:
         verbose=False,
     )
 
+    description=(
+    f"KONTEXT (minne og historikk):\n{context}\n\n"
+    "Svar på meldingen fra kunden:\n"
+    f"---\n{message}\n---\n\n"
+    ...
+)
     task = Task(
         description=(
             "Svar på meldingen fra kunden:\n"

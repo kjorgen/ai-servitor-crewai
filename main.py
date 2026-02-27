@@ -91,10 +91,15 @@ KORT SAMTALEHISTORIKK:
 
 app = FastAPI(title="AI-servitør API")
 
-# Enkel CORS slik at GitHub-siden din får lov til å kalle API-et
+from fastapi.middleware.cors import CORSMiddleware
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://kjorgen.github.io",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

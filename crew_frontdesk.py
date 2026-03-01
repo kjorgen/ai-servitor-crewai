@@ -36,8 +36,8 @@ def run_frontdesk(
     history = history or []
     history_trimmed = history[-10:]
     history_text = "\n".join(
-        [f"{m.get('role','user')}: {m.get('content','')}" for m in history_trimmed]
-    ).strip()
+    [f"{m.get('role','user')}: {m.get('text') or m.get('content') or ''}" for m in history_trimmed]
+).strip()
 
     rules = """
 REGLER (MÅ FØLGES):
@@ -46,6 +46,8 @@ REGLER (MÅ FØLGES):
 3) Ikke finn på åpningstider, priser, allergener eller kontaktinfo.
 4) Ved reservasjon: be om det som mangler av: dato, tidspunkt, antall personer, navn, telefonnummer.
 5) Hvis kunden allerede har gitt noe informasjon tidligere i chatten, IKKE be om det på nytt. Bruk det som er oppgitt.
+6) Still MAKS 1 oppfølgingsspørsmål om gangen.
+7) For booking: spør i denne rekkefølgen: dato -> tidspunkt -> antall personer -> navn -> telefon.
 """
 
     frontdesk = Agent(
@@ -64,7 +66,8 @@ REGLER (MÅ FØLGES):
     task = Task(
         description=(
             "Du svarer på en melding fra kunden.\n\n"
-            f"KONTEKST (tidligere meldinger i chatten):\n{history_text}\n\n"
+            f"KONTEKST (kjent info + mangler + kort historikk):\n{context}\n\n"
+            f"EKSTRA HISTORIKK (rå, siste 10):\n{history_text}\n\n"
             f"NY MELDING:\n{message}\n\n"
             "Krav:\n"
             "- Svar på norsk\n"

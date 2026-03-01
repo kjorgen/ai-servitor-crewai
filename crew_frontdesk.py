@@ -12,7 +12,11 @@ def load_kb() -> str:
     except Exception:
         return ""
 
-def run_frontdesk(message: str, history: list[dict] | None = None) -> str:
+def run_frontdesk(
+    message: str,
+    context: str = "",
+    history: list[dict] | None = None
+) -> str:
     """
     history: liste med meldinger som [{"role":"user|assistant","content":"..."}]
     """

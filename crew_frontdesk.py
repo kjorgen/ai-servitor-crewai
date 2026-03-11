@@ -17,9 +17,6 @@ def run_frontdesk(
     context: str = "",
     history: list[dict] | None = None
 ) -> str:
-    """
-    history: liste med meldinger som [{"role":"user|assistant","content":"..."}]
-    """
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         return "Beklager, serveren mangler API-nøkkel (OPENAI_API_KEY)."
@@ -32,14 +29,13 @@ def run_frontdesk(
 
     kb = load_kb()
 
-    # Bygg en enkel kontekststreng fra historikk (siste 10 meldinger)
     history = history or []
     history_trimmed = history[-10:]
     history_text = "\n".join(
-    [f"{m.get('role','user')}: {m.get('text') or m.get('content') or ''}" for m in history_trimmed]
-).strip()
+        [f"{m.get('role','user')}: {m.get('text') or m.get('content') or ''}" for m in history_trimmed]
+    ).strip()
 
-rules = """
+    rules = """
 REGLER (MÅ FØLGES):
 1) Svar kun basert på KUNNSKAPSBASEN og KONTEKSTEN fra denne chatten.
 2) Hvis info ikke finnes i kunnskapsbasen eller konteksten: si at du ikke har informasjonen. Ikke gjett.
@@ -65,30 +61,30 @@ REGLER (MÅ FØLGES):
         llm=llm,
         verbose=False,
     )
-    
+
     task = Task(
-    description=(
-        "Du svarer på en melding fra kunden.\n\n"
-        "VIKTIG:\n"
-        "- Bruk KONTEKSTEN under som fasit for hva som allerede er kjent.\n"
-        "- Hvis KONTEKSTEN sier at noe allerede er oppgitt, skal du ikke spørre om det igjen.\n"
-        "- Hvis KONTEKSTEN viser manglende bookingfelter, skal du kun spørre om NESTE manglende felt.\n"
-        "- Still maks ett spørsmål i svaret.\n"
-        "- Ikke bland inn andre temaer hvis brukeren er i bookingflyt.\n\n"
-        f"KONTEKST (kjent info + mangler + kort historikk):\n{context}\n\n"
-        f"EKSTRA HISTORIKK (rå, siste 10):\n{history_text or 'ingen'}\n\n"
-        f"NY MELDING:\n{message}\n\n"
-        "KRAV TIL SVARET:\n"
-        "- Svar på norsk\n"
-        "- Maks 2 korte setninger\n"
-        "- Ved booking: spør kun om ett manglende felt\n"
-        "- Ved allergi: svar forsiktig og anbefal dobbeltsjekk med restauranten ved tvil\n"
-        "- Ikke finn på informasjon som ikke finnes i kunnskapsbasen eller konteksten\n"
-    ),
-    expected_output="Et kort, korrekt svar på norsk med maks ett oppfølgingsspørsmål.",
-    agent=frontdesk,
+        description=(
+            "Du svarer på en melding fra kunden.\n\n"
+            "VIKTIG:\n"
+            "- Bruk KONTEKSTEN under som fasit for hva som allerede er kjent.\n"
+            "- Hvis KONTEKSTEN sier at noe allerede er oppgitt, skal du ikke spørre om det igjen.\n"
+            "- Hvis KONTEKSTEN viser manglende bookingfelter, skal du kun spørre om NESTE manglende felt.\n"
+            "- Still maks ett spørsmål i svaret.\n"
+            "- Ikke bland inn andre temaer hvis brukeren er i bookingflyt.\n\n"
+            f"KONTEKST (kjent info + mangler + kort historikk):\n{context}\n\n"
+            f"EKSTRA HISTORIKK (rå, siste 10):\n{history_text or 'ingen'}\n\n"
+            f"NY MELDING:\n{message}\n\n"
+            "KRAV TIL SVARET:\n"
+            "- Svar på norsk\n"
+            "- Maks 2 korte setninger\n"
+            "- Ved booking: spør kun om ett manglende felt\n"
+            "- Ved allergi: svar forsiktig og anbefal dobbeltsjekk med restauranten ved tvil\n"
+            "- Ikke finn på informasjon som ikke finnes i kunnskapsbasen eller konteksten\n"
+        ),
+        expected_output="Et kort, korrekt svar på norsk med maks ett oppfølgingsspørsmål.",
+        agent=frontdesk,
     )
-    
+
     crew = Crew(agents=[frontdesk], tasks=[task], verbose=False)
     result = crew.kickoff()
     return str(result).strip()

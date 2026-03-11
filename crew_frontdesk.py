@@ -55,7 +55,7 @@ REGLER (MÅ FØLGES):
 
     frontdesk = Agent(
         role="Digital resepsjonist",
-        goal="Svar korrekt på spørsmål om restauranten, og samle inn reservasjon-detaljer på en ryddig måte.",
+        goal="Svar korrekt på spørsmål om restauranten, og samle inn reservasjonsdetaljer på en ryddig måte.",
         backstory=(
             "Du er en digital resepsjonist for restauranten Made in India.\n\n"
             f"{rules}\n\n"

@@ -62,21 +62,37 @@ def extract_slots(text: str, slots: Dict[str, Any]) -> None:
     if m and not slots.get("name"):
         slots["name"] = m.group(2)
 
+def next_missing_slot(slots):
+    order = ["date", "time", "people", "name", "phone"]
+    for key in order:
+        if not slots.get(key):
+            return key
+    return None
+
+
 def build_context(session: Dict[str, Any], max_turns: int = 8) -> str:
-    # kort historikk
     turns = session["history"][-max_turns:]
     convo = "\n".join([f'{x["role"]}: {x["text"]}' for x in turns])
 
     slots = session["slots"]
     known = ", ".join([f"{k}={v}" for k, v in slots.items() if v])
     missing = [k for k, v in slots.items() if not v]
+    next_slot = next_missing_slot(slots)
+
+    booking_active = any(slots.values())
 
     return f"""
-KJENT INFO (fra samtalen):
+KJENT INFO:
 {known if known else "ingen"}
 
-MANGLER (spør kun om dette hvis det trengs):
-{", ".join(missing)}
+MANGLER:
+{", ".join(missing) if missing else "ingen"}
+
+NESTE FELT:
+{next_slot if next_slot else "ingen"}
+
+BOOKING AKTIV:
+{"ja" if booking_active else "nei"}
 
 KORT SAMTALEHISTORIKK:
 {convo if convo else "ingen"}

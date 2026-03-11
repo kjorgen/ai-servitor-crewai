@@ -39,15 +39,18 @@ def run_frontdesk(
     [f"{m.get('role','user')}: {m.get('text') or m.get('content') or ''}" for m in history_trimmed]
 ).strip()
 
-    rules = """
+rules = """
 REGLER (MÅ FØLGES):
-1) Svar kun basert på KUNNSKAPSBASEN og det brukeren har oppgitt i denne chatten.
-2) Hvis info ikke finnes i kunnskapsbasen: si at du ikke har informasjonen. Ikke gjett.
-3) Ikke finn på åpningstider, priser, allergener eller kontaktinfo.
-4) Ved reservasjon: be om det som mangler av: dato, tidspunkt, antall personer, navn, telefonnummer.
-5) Hvis kunden allerede har gitt noe informasjon tidligere i chatten, IKKE be om det på nytt. Bruk det som er oppgitt.
+1) Svar kun basert på KUNNSKAPSBASEN og KONTEKSTEN fra denne chatten.
+2) Hvis info ikke finnes i kunnskapsbasen eller konteksten: si at du ikke har informasjonen. Ikke gjett.
+3) Ikke finn på åpningstider, priser, allergener, kontaktinfo eller bookingdetaljer.
+4) Ved reservasjon: bruk først info som allerede finnes i KONTEKSTEN.
+5) Ikke be om informasjon som allerede er oppgitt.
 6) Still MAKS 1 oppfølgingsspørsmål om gangen.
 7) For booking: spør i denne rekkefølgen: dato -> tidspunkt -> antall personer -> navn -> telefon.
+8) Hvis KONTEKSTEN viser hva som mangler, skal du kun spørre om neste manglende felt.
+9) Hvis alle bookingfelter er fylt ut, skal du ikke spørre om mer informasjon.
+10) Ikke bland inn allergi, meny eller andre temaer i en bookingflyt med mindre brukeren spør om det.
 """
 
     frontdesk = Agent(

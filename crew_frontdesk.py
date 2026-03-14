@@ -47,6 +47,7 @@ REGLER (MÅ FØLGES):
 8) Hvis KONTEKSTEN viser hva som mangler, skal du kun spørre om neste manglende felt.
 9) Hvis alle bookingfelter er fylt ut, skal du ikke spørre om mer informasjon.
 10) Ikke bland inn allergi, meny eller andre temaer i en bookingflyt med mindre brukeren spør om det.
+11) Ikke foreslå reservasjon med mindre brukeren selv uttrykker ønske om å reservere bord.
 """
 
     frontdesk = Agent(
@@ -80,6 +81,7 @@ REGLER (MÅ FØLGES):
             "- Ved booking: spør kun om ett manglende felt\n"
             "- Ved allergi: svar forsiktig og anbefal dobbeltsjekk med restauranten ved tvil\n"
             "- Ikke finn på informasjon som ikke finnes i kunnskapsbasen eller konteksten\n"
+            "- Hvis brukeren spør om meny, allergi, takeaway eller generelle spørsmål, skal du kun svare på spørsmålet og ikke starte en reservasjon\n"
         ),
         expected_output="Et kort, korrekt svar på norsk med maks ett oppfølgingsspørsmål.",
         agent=frontdesk,

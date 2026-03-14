@@ -35,6 +35,21 @@ def run_frontdesk(
         [f"{m.get('role','user')}: {m.get('text') or m.get('content') or ''}" for m in history_trimmed]
     ).strip()
 
+    enhanced_message = f"""
+    RESTAURANT CONTEXT
+    {context}
+    
+    CHAT HISTORY
+    {history_text}
+    
+    USER MESSAGE
+    {message}
+    
+    Assistant instructions:
+    Answer the user's question first.
+    Only start reservation if the user explicitly asks to reserve a table.
+    """
+
     rules = """
 REGLER (MÅ FØLGES):
 1) Svar kun basert på KUNNSKAPSBASEN og KONTEKSTEN fra denne chatten.
@@ -47,7 +62,8 @@ REGLER (MÅ FØLGES):
 8) Hvis KONTEKSTEN viser hva som mangler, skal du kun spørre om neste manglende felt.
 9) Hvis alle bookingfelter er fylt ut, skal du ikke spørre om mer informasjon.
 10) Ikke bland inn allergi, meny eller andre temaer i en bookingflyt med mindre brukeren spør om det.
-11) Ikke foreslå reservasjon med mindre brukeren selv uttrykker ønske om å reservere bord.
+11) Ikke foreslå reservasjon hvis brukeren spør om meny, åpningstider, takeaway eller generell informasjon.
+12) Start kun reservasjon hvis brukeren selv uttrykker at de vil reservere bord.
 """
 
     frontdesk = Agent(

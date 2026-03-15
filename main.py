@@ -69,8 +69,55 @@ def next_missing_slot(slots):
             return key
     return None
 
+def detect_primary_intent(text: str) -> str:
+    t = text.lower().strip()
 
-def build_context(session: Dict[str, Any], max_turns: int = 8) -> str:
+    takeaway_words = [
+        "takeaway", "take away", "hente", "henting", "ta med", "bestille og hente"
+    ]
+
+    menu_words = [
+        "meny", "sterk mat", "sterke retter", "rett", "retter",
+        "vegetar", "vegetarisk", "vegansk", "vegan", "dosa",
+        "butter chicken", "spicy", "mat"
+    ]
+
+    info_words = [
+        "åpent", "åpningstid", "åpningstider", "stenger",
+        "adresse", "telefon", "hvor ligger", "kontakt"
+    ]
+
+    booking_words = [
+        "reservere", "reservasjon", "booke", "booking",
+        "bestille bord", "bordbestilling", "bord"
+    ]
+
+    if any(w in t for w in takeaway_words):
+        return "TAKEAWAY"
+
+    if any(w in t for w in menu_words):
+        return "MENU"
+
+    if any(w in t for w in info_words):
+        return "INFO"
+
+    if any(w in t for w in booking_words):
+        return "BOOKING"
+
+    return "GENERAL"
+
+def next_missing_slot(slots: Dict[str, Any]) -> str | None:
+    order = ["date", "time", "people", "name", "phone"]
+    for key in order:
+        if not slots.get(key):
+            return key
+    return None
+
+def build_context(
+    session: Dict[str, Any],
+    primary_intent: str,
+    max_turns: int = 8
+) -> str:
     turns = session["history"][-max_turns:]
     convo = "\n".join([f'{x["role"]}: {x["text"]}' for x in turns])
 
@@ -81,22 +128,25 @@ def build_context(session: Dict[str, Any], max_turns: int = 8) -> str:
 
     booking_active = any(slots.values())
 
-    return f"""
-KJENT INFO:
-{known if known else "ingen"}
-
-MANGLER:
-{", ".join(missing) if missing else "ingen"}
-
-NESTE FELT:
-{next_slot if next_slot else "ingen"}
-
-BOOKING AKTIV:
-{"ja" if booking_active else "nei"}
-
-KORT SAMTALEHISTORIKK:
-{convo if convo else "ingen"}
-""".strip()
+        return f"""
+    PRIMÆR INTENSJON:
+    {primary_intent}
+    
+    KJENT INFO:
+    {known if known else "ingen"}
+    
+    MANGLER:
+    {", ".join(missing) if missing else "ingen"}
+    
+    NESTE FELT:
+    {next_slot if next_slot else "ingen"}
+    
+    BOOKING AKTIV:
+    {"ja" if booking_active else "nei"}
+    
+    KORT SAMTALEHISTORIKK:
+    {convo if convo else "ingen"}
+    """.strip()
 
 # Henter API-nøkkel fra miljøvariabel
 #OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -199,22 +249,33 @@ from crew_frontdesk import run_frontdesk  # antar du har denne
 
 @app.post("/chat")
 def chat(req: ChatRequest):
-    session = get_session(req.session_id)
+    try:
+        session = get_session(req.session_id)
 
-    # 1) lagre user-melding i historikk
-    session["history"].append({"role": "user", "text": req.message})
+        # 1) lagre user-melding i historikk
+        session["history"].append({"role": "user", "text": req.message})
 
-    # 2) trekk ut “slots” fra user-meldingen
-    extract_slots(req.message, session["slots"])
+        # 2) trekk ut slots
+        extract_slots(req.message, session["slots"])
 
-    # 3) bygg kontekst til agenten
-    context = build_context(session)
+        # 3) oppdag primær intensjon
+        primary_intent = detect_primary_intent(req.message)
 
-    # 4) kall agenten med message + context
-    reply = run_frontdesk(message=req.message, context=context)
+        # 4) bygg kontekst
+        context = build_context(session, primary_intent=primary_intent)
 
-    # 5) lagre svar
-    session["history"].append({"role": "assistant", "text": reply})
+        # 5) kall agenten
+        reply = run_frontdesk(
+            message=req.message,
+            context=context,
+            history=session["history"]
+        )
 
-    return {"reply": reply}
+        # 6) lagre svar
+        session["history"].append({"role": "assistant", "text": reply})
+
+        return {"reply": reply}
+
+    except Exception as e:
+        return {"reply": f"Beklager, det oppstod en serverfeil: {str(e)}"}
 

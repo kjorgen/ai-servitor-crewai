@@ -62,8 +62,8 @@ REGLER (MÅ FØLGES):
 8) Hvis KONTEKSTEN viser hva som mangler, skal du kun spørre om neste manglende felt.
 9) Hvis alle bookingfelter er fylt ut, skal du ikke spørre om mer informasjon.
 10) Ikke bland inn allergi, meny eller andre temaer i en bookingflyt med mindre brukeren spør om det.
-11) Ikke foreslå reservasjon hvis brukeren spør om meny, åpningstider, takeaway eller generell informasjon.
-12) Start kun reservasjon hvis brukeren selv uttrykker at de vil reservere bord.
+11) Ikke foreslå reservasjon hvis PRIMÆR INTENSJON ikke er BOOKING.
+12) Hvis brukeren spør om meny, åpningstider, takeaway eller generell informasjon, svar kun på det brukeren spør om.
 """
 
     frontdesk = Agent(
@@ -83,6 +83,12 @@ REGLER (MÅ FØLGES):
         description=(
             "Du svarer på en melding fra kunden.\n\n"
             "VIKTIG:\n"
+            "VIKTIG OM INTENSJON:\n"
+            "- Hvis PRIMÆR INTENSJON er MENU, skal du kun svare på spørsmål om mat, meny eller retter.\n"
+            "- Hvis PRIMÆR INTENSJON er INFO, skal du kun svare på informasjonsspørsmålet.\n"
+            "- Hvis PRIMÆR INTENSJON er TAKEAWAY, skal du svare om takeaway og ikke starte reservasjon.\n"
+            "- Hvis PRIMÆR INTENSJON er GENERAL, skal du svare kort på spørsmålet uten å starte reservasjon.\n"
+            "- Start kun bookingflyt hvis PRIMÆR INTENSJON er BOOKING.\n\n"
             "- Bruk KONTEKSTEN under som fasit for hva som allerede er kjent.\n"
             "- Hvis KONTEKSTEN sier at noe allerede er oppgitt, skal du ikke spørre om det igjen.\n"
             "- Hvis KONTEKSTEN viser manglende bookingfelter, skal du kun spørre om NESTE manglende felt.\n"

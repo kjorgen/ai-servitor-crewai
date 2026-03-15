@@ -129,25 +129,25 @@ def build_context(
 
     booking_active = any(slots.values())
 
-return f"""
-PRIMÆR INTENSJON:
-{primary_intent}
-
-KJENT INFO:
-{known if known else "ingen"}
-
-MANGLER:
-{", ".join(missing) if missing else "ingen"}
-
-NESTE FELT:
-{next_slot if next_slot else "ingen"}
-
-BOOKING AKTIV:
-{"ja" if booking_active else "nei"}
-
-KORT SAMTALEHISTORIKK:
-{convo if convo else "ingen"}
-""".strip()
+    return f"""
+    PRIMÆR INTENSJON:
+    {primary_intent}
+    
+    KJENT INFO:
+    {known if known else "ingen"}
+    
+    MANGLER:
+    {", ".join(missing) if missing else "ingen"}
+    
+    NESTE FELT:
+    {next_slot if next_slot else "ingen"}
+    
+    BOOKING AKTIV:
+    {"ja" if booking_active else "nei"}
+    
+    KORT SAMTALEHISTORIKK:
+    {convo if convo else "ingen"}
+    """.strip()
 
 # Henter API-nøkkel fra miljøvariabel
 #OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
